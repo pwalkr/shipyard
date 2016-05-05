@@ -1,0 +1,36 @@
+#!/bin/bash
+
+usage() {
+cat <<EOF
+Usage:
+	wifi-bridge - bridge ethernet and a wifi interface leveraging docker
+
+wifi-bridge [options] <ethernet interface> <wifi interface>
+
+EOF
+}
+
+ETH_IF="$1"
+WLAN_IF="$2"
+
+DOCKER_IMAGE="strayguin/wifi-bridge"
+
+build() {
+	local context="$(mktemp -d)"
+	local rcode=
+
+	cat <<-EOF > "$context/Dockerfile"
+		FROM debian
+	EOF
+
+	docker build --tag $IMAGE "$context"
+	rcode=$?
+
+	rm --recursive --force "$context"
+
+	return $rcode
+}
+
+if [ -z "$(docker images --quiet $DOCKER_IMAGE)" ]; then
+	build
+fi
